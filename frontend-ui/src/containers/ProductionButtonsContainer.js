@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { makeWidgetsAction, sellWidgetsAction } from '../actions';
+import { makeWidgetsAction, sellWidgetsAction, hireWorkerDronesAction } from '../actions';
 
 import ProductionButtons from '../components/ProductionButtons';
 
@@ -11,7 +11,10 @@ const mapDispatchToProps = dispatch => {
     },
     sellWidget: numWidgets => {
       dispatch(sellWidgetsAction(numWidgets))
-    }
+    },
+    buyWorkerDrone: numWorkers => {
+      dispatch(hireWorkerDronesAction(numWorkers))
+    },
   };
 };
 
