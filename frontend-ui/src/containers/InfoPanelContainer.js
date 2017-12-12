@@ -7,8 +7,12 @@ const mapStateToProps = state => {
   return {
     money: state.amtMoney,
     widgets: state.numWidgets,
+
     workerDrones: state.numWorkerDrones,
+    workerCostPerTick: state.numWorkerDrones.times(state.workerDroneUpkeep),
+
     salesDrones: state.numSalesDrones,
+    salesCostPerTick: state.numSalesDrones.times(state.salesDroneUpkeep),
   };
 };
 

@@ -5,13 +5,15 @@ import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE, HIRE_SALES_DRONE
 const initialState = {
   amtMoney: bigInt(0),
   numWidgets: bigInt(0),
-  widgetSellPrice: bigInt(2),
+  widgetSellPrice: bigInt(3),
 
   numWorkerDrones: bigInt(0),
   workerDronePrice: bigInt(10),
+  workerDroneUpkeep: bigInt(1),
 
   numSalesDrones: bigInt(0),
   salesDronePrice: bigInt(25),
+  salesDroneUpkeep: bigInt(1),
 };
 
 function makeWidgets(prevState, action) {
@@ -49,12 +51,22 @@ function buySalesDrone(prevState, action) {
   }
 }
 
+function calculateUpkeep(prevState) {
+  const workersUpkeep = prevState.numWorkerDrones.times(prevState.workerDroneUpkeep);
+  const salesUpkeep = prevState.numSalesDrones.times(prevState.salesDroneUpkeep);
+
+  return workersUpkeep.plus(salesUpkeep);
+}
+
 function doUpdate(prevState, action) {
   const toMake = prevState.numWorkerDrones.times(action.numTicks);
   const toSell = bigInt.min(prevState.numWidgets, prevState.numSalesDrones.times(action.numTicks));
 
   const newWidgets = prevState.numWidgets.plus(toMake).minus(toSell);
-  const newMoney = prevState.amtMoney.plus(toSell.times(prevState.widgetSellPrice));
+  let newMoney = prevState.amtMoney.plus(toSell.times(prevState.widgetSellPrice));
+
+  const upkeep = calculateUpkeep(prevState);
+  newMoney = newMoney.minus(upkeep);  
 
   return {
     ...prevState,
