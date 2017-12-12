@@ -1,6 +1,6 @@
 import bigInt from 'big-integer';
 
-import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE } from '../actionTypes';
+import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE, HIRE_SALES_DRONE } from '../actionTypes';
 
 const initialState = {
   amtMoney: bigInt(0),
@@ -9,6 +9,9 @@ const initialState = {
 
   numWorkerDrones: bigInt(0),
   workerDronePrice: bigInt(10),
+
+  numSalesDrones: bigInt(0),
+  salesDronePrice: bigInt(25),
 };
 
 function makeWidgets(prevState, action) {
@@ -37,12 +40,26 @@ function buyWorkerDrone(prevState, action) {
   }
 }
 
+function buySalesDrone(prevState, action) {
+  const toHire = bigInt.min(action.numSalesDrones, prevState.amtMoney.divide(prevState.salesDronePrice));
+  return {
+    ...prevState,
+    numSalesDrones: prevState.numSalesDrones.plus(toHire),
+    amtMoney: prevState.amtMoney.minus(toHire.times(prevState.salesDronePrice))
+  }
+}
+
 function doUpdate(prevState, action) {
   const toMake = prevState.numWorkerDrones.times(action.numTicks);
+  const toSell = bigInt.min(prevState.numWidgets, prevState.numSalesDrones.times(action.numTicks));
+
+  const newWidgets = prevState.numWidgets.plus(toMake).minus(toSell);
+  const newMoney = prevState.amtMoney.plus(toSell.times(prevState.widgetSellPrice));
 
   return {
     ...prevState,
-    numWidgets: prevState.numWidgets.plus(toMake)
+    numWidgets: newWidgets,
+    amtMoney: newMoney
   };
 }
 
@@ -54,9 +71,12 @@ function mainReducer(prevState = initialState, action) {
       return sellWidgets(prevState, action);
     case HIRE_WORKER_DRONE:
       return buyWorkerDrone(prevState, action);
+    case HIRE_SALES_DRONE:
+      return buySalesDrone(prevState, action);
     case UPDATE:
       return doUpdate(prevState, action);
     default:
+      console.error("Unrecognized action type: " + action.type + "; action was '" + JSON.stringify(action) + "'");
       return prevState;
   }
 }
