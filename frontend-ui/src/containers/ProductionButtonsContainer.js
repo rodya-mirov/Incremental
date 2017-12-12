@@ -1,9 +1,15 @@
 import { connect } from 'react-redux';
-import { makeWidgetsAction, sellWidgetsAction, hireWorkerDronesAction } from '../actions';
+import { makeWidgetsAction, sellWidgetsAction, hireWorkerDronesAction, hireSalesDronesAction } from '../actions';
 
 import ProductionButtons from '../components/ProductionButtons';
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => {
+  return {
+    widgetPrice: state.widgetSellPrice,
+    workerDronePrice: state.workerDronePrice,
+    salesDronePrice: state.salesDronePrice,
+  };
+};
 const mapDispatchToProps = dispatch => {
   return {
     makeWidget: numWidgets => {
@@ -14,6 +20,9 @@ const mapDispatchToProps = dispatch => {
     },
     buyWorkerDrone: numWorkers => {
       dispatch(hireWorkerDronesAction(numWorkers))
+    },
+    buySalesDrone: numWorkers => {
+      dispatch(hireSalesDronesAction(numWorkers))
     },
   };
 };

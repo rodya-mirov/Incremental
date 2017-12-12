@@ -1,6 +1,6 @@
 import bigInt from 'big-integer';
 
-import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE } from '../actionTypes';
+import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE, HIRE_SALES_DRONE } from '../actionTypes';
 
 export function makeWidgetsAction(numWidgets=bigInt(1)) {
   return { type: MAKE_WIDGETS, numWidgets: numWidgets };
@@ -12,6 +12,10 @@ export function sellWidgetsAction(numWidgets=bigInt(1)) {
 
 export function hireWorkerDronesAction(numWorkerDrones=bigInt(1)) {
   return { type: HIRE_WORKER_DRONE, numWorkerDrones: numWorkerDrones };
+}
+
+export function hireSalesDronesAction(numSalesDrones=bigInt(1)) {
+  return { type: HIRE_SALES_DRONE, numSalesDrones: numSalesDrones };
 }
 
 export function updateAction(numTicks=bigInt(1)) {
