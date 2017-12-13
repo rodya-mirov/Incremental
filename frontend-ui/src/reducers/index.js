@@ -5,15 +5,17 @@ import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE, HIRE_SALES_DRONE
 const initialState = {
   amtMoney: bigInt(0),
   numWidgets: bigInt(0),
-  widgetSellPrice: bigInt(3),
+  widgetSellPrice: bigInt(4),
 
   numWorkerDrones: bigInt(0),
   workerDronePrice: bigInt(10),
   workerDroneUpkeep: bigInt(1),
+  workerDroneProduction: bigInt(1),
 
   numSalesDrones: bigInt(0),
   salesDronePrice: bigInt(25),
-  salesDroneUpkeep: bigInt(1),
+  salesDroneUpkeep: bigInt(2),
+  salesDroneProduction: bigInt(1),
 };
 
 function makeWidgets(prevState, action) {
@@ -58,21 +60,42 @@ function calculateUpkeep(prevState) {
   return workersUpkeep.plus(salesUpkeep);
 }
 
+function tryUpkeepTicks(amtMoney, numDrones, eachUpkeep) {
+  const numSuccesses = bigInt.min(numDrones, amtMoney.divide(eachUpkeep));
+  const numFailures = numDrones.minus(numSuccesses);
+  const upkeepPaid = numSuccesses.times(eachUpkeep);
+
+  return { numSuccesses, numFailures, upkeepPaid };
+}
+
+// TODO: the 'num ticks' functionality is totally unused/ignored for now
 function doUpdate(prevState, action) {
-  const toMake = prevState.numWorkerDrones.times(action.numTicks);
-  const toSell = bigInt.min(prevState.numWidgets, prevState.numSalesDrones.times(action.numTicks));
+  let newWidgets = prevState.numWidgets;
+  let newMoney = prevState.amtMoney;
 
-  const newWidgets = prevState.numWidgets.plus(toMake).minus(toSell);
-  let newMoney = prevState.amtMoney.plus(toSell.times(prevState.widgetSellPrice));
+  // TODO: messaging when drones quit!
+  const doWorkerUpkeep = tryUpkeepTicks(newMoney, prevState.numWorkerDrones, prevState.workerDroneUpkeep);
 
-  const upkeep = calculateUpkeep(prevState);
-  newMoney = newMoney.minus(upkeep);  
+  const newWorkerDrones = doWorkerUpkeep.numSuccesses;
+  newMoney = newMoney.minus(doWorkerUpkeep.upkeepPaid);
+  newWidgets = newWidgets.plus(doWorkerUpkeep.numSuccesses.times(prevState.workerDroneProduction));
+
+  // TODO: messaging when drones quit!
+  const doSalesUpkeep = tryUpkeepTicks(newMoney, prevState.numSalesDrones, prevState.salesDroneUpkeep);
+
+  const newSalesDrones = doSalesUpkeep.numSuccesses;
+  newMoney = newMoney.minus(doSalesUpkeep.upkeepPaid);
+  newMoney = newMoney.plus(doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction).times(prevState.widgetSellPrice));
+  newWidgets = newWidgets.minus(doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction));
 
   return {
     ...prevState,
     numWidgets: newWidgets,
-    amtMoney: newMoney
-  };
+    amtMoney: newMoney,
+
+    numWorkerDrones: newWorkerDrones,
+    numSalesDrones: newSalesDrones,
+  }
 }
 
 function mainReducer(prevState = initialState, action) {
