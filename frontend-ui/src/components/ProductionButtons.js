@@ -17,7 +17,7 @@ const ProductionButtons = props => (
     <button onClick={() => props.buyWorkerDrone(1)}>
       Hire Worker Drone (for ${props.workerDronePrice.toString()})
     </button>
-    <button onClick={() => props.buyWorkerDrone(1)}>
+    <button onClick={() => props.buySalesDrone(1)}>
       Hire Sales Drone (for ${props.salesDronePrice.toString()})
     </button>
   </div>

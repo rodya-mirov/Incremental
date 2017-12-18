@@ -20,7 +20,7 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-setInterval(() => store.dispatch(updateAction()), 1000);
+setInterval(() => store.dispatch(updateAction()), 100);
 
 // Boilerplate from the generator; I forgot what it does (efficiency???)
 registerServiceWorker();

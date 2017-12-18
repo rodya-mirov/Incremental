@@ -16,11 +16,8 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({});
-
 const InfoPanelContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
+  mapStateToProps
 )(InfoPanel);
 
 export default InfoPanelContainer;
