@@ -1,6 +1,7 @@
 import bigInt from 'big-integer';
 
-import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE, HIRE_SALES_DRONE } from '../actionTypes';
+import { MAKE_WIDGETS, SELL_WIDGETS, HIRE_WORKER_DRONE, UPDATE, HIRE_SALES_DRONE, LOG } from '../actionTypes';
+import { expiringLog } from '../logs';
 
 const initialState = {
   amtMoney: bigInt(0),
@@ -16,6 +17,8 @@ const initialState = {
   salesDronePrice: bigInt(25),
   salesDroneUpkeep: bigInt(2),
   salesDroneProduction: bigInt(1),
+
+  logs: [],
 };
 
 function makeWidgets(prevState, action) {
@@ -53,11 +56,14 @@ function buySalesDrone(prevState, action) {
   }
 }
 
-function calculateUpkeep(prevState) {
-  const workersUpkeep = prevState.numWorkerDrones.times(prevState.workerDroneUpkeep);
-  const salesUpkeep = prevState.numSalesDrones.times(prevState.salesDroneUpkeep);
+function addLog(prevState, action) {
+  const newLogs = prevState.logs.map(x => x);
+  newLogs.push(action.log);
 
-  return workersUpkeep.plus(salesUpkeep);
+  return {
+    ...prevState,
+    logs: newLogs
+  }
 }
 
 function tryUpkeepTicks(amtMoney, numDrones, eachUpkeep) {
@@ -70,26 +76,42 @@ function tryUpkeepTicks(amtMoney, numDrones, eachUpkeep) {
 
 // TODO: the 'num ticks' functionality is totally unused/ignored for now
 function doUpdate(prevState, action) {
+  const logs = prevState.logs
+      .map(log => { let newLog = log.copy(); newLog.tick(); return newLog; })
+      .filter(log => !log.isFinished())
+      .sort((a, b) => a.priority - b.priority);
+
   let newWidgets = prevState.numWidgets;
   let newMoney = prevState.amtMoney;
 
-  // TODO: messaging when drones quit!
+  // Worker drone upkeep
   const doWorkerUpkeep = tryUpkeepTicks(newMoney, prevState.numWorkerDrones, prevState.workerDroneUpkeep);
 
   const newWorkerDrones = doWorkerUpkeep.numSuccesses;
   newMoney = newMoney.minus(doWorkerUpkeep.upkeepPaid);
   newWidgets = newWidgets.plus(doWorkerUpkeep.numSuccesses.times(prevState.workerDroneProduction));
 
-  // TODO: messaging when drones quit!
+  if (doWorkerUpkeep.numFailures > 0) {
+    logs.push(expiringLog("Due to failed upkeep, had to fire " + doWorkerUpkeep.numFailures.toString() + " worker drones!", 100));
+  }
+
+  // Sales drone upkeep
   const doSalesUpkeep = tryUpkeepTicks(newMoney, prevState.numSalesDrones, prevState.salesDroneUpkeep);
 
   const newSalesDrones = doSalesUpkeep.numSuccesses;
+  // TODO BUG: can sell more widgets than actually exist
   newMoney = newMoney.minus(doSalesUpkeep.upkeepPaid);
   newMoney = newMoney.plus(doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction).times(prevState.widgetSellPrice));
   newWidgets = newWidgets.minus(doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction));
 
+  if (doSalesUpkeep.numFailures > 0) {
+    logs.push(expiringLog("Due to failed upkeep, had to fire " + doSalesUpkeep.numFailures.toString() + " sales drones!", 100));
+  }
+
   return {
     ...prevState,
+    logs: logs,
+
     numWidgets: newWidgets,
     amtMoney: newMoney,
 
@@ -100,6 +122,7 @@ function doUpdate(prevState, action) {
 
 function mainReducer(prevState = initialState, action) {
   switch (action.type) {
+    // user actions ...
     case MAKE_WIDGETS:
       return makeWidgets(prevState, action);
     case SELL_WIDGETS:
@@ -108,8 +131,16 @@ function mainReducer(prevState = initialState, action) {
       return buyWorkerDrone(prevState, action);
     case HIRE_SALES_DRONE:
       return buySalesDrone(prevState, action);
+
+    // time-based events ...
     case UPDATE:
       return doUpdate(prevState, action);
+    
+    // system-generated events ...
+    case LOG:
+      return addLog(prevState, action);
+    
+    // error handling
     default:
       console.error("Unrecognized action type: " + action.type + "; action was '" + JSON.stringify(action) + "'");
       return prevState;

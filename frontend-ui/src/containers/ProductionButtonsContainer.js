@@ -10,6 +10,7 @@ const mapStateToProps = state => {
     salesDronePrice: state.salesDronePrice,
   };
 };
+
 const mapDispatchToProps = dispatch => {
   return {
     makeWidget: numWidgets => {
