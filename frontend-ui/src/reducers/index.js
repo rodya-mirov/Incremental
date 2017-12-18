@@ -99,10 +99,11 @@ function doUpdate(prevState, action) {
   const doSalesUpkeep = tryUpkeepTicks(newMoney, prevState.numSalesDrones, prevState.salesDroneUpkeep);
 
   const newSalesDrones = doSalesUpkeep.numSuccesses;
+  const actualSales = bigInt.min(doSalesUpkeep.numSuccesses, prevState.numWidgets.divide(prevState.salesDroneProduction));
   // TODO BUG: can sell more widgets than actually exist
   newMoney = newMoney.minus(doSalesUpkeep.upkeepPaid);
-  newMoney = newMoney.plus(doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction).times(prevState.widgetSellPrice));
-  newWidgets = newWidgets.minus(doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction));
+  newMoney = newMoney.plus(actualSales.times(prevState.salesDroneProduction).times(prevState.widgetSellPrice));
+  newWidgets = newWidgets.minus(actualSales.times(prevState.salesDroneProduction));
 
   if (doSalesUpkeep.numFailures > 0) {
     logs.push(expiringLog("Due to failed upkeep, had to fire " + doSalesUpkeep.numFailures.toString() + " sales drones!", 100));
