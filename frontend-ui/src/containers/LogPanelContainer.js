@@ -1,16 +1,16 @@
-import { connect } from 'react-redux';
+// @flow
 
-import LogPanel from '../components/LogPanel';
+import { connect } from "react-redux";
+
+import LogPanel from "../components/LogPanel";
 
 const mapStateToProps = state => {
   // console.log("State used for LogPanel: " + JSON.stringify(state));
   return {
-    logs: state.logs,
+    logs: state.logs
   };
 };
 
-const LogPanelContainer = connect(
-  mapStateToProps
-)(LogPanel);
+const LogPanelContainer = connect(mapStateToProps)(LogPanel);
 
 export default LogPanelContainer;

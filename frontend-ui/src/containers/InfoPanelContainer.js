@@ -1,6 +1,8 @@
-import { connect } from 'react-redux';
+// @flow
 
-import InfoPanel from '../components/InfoPanel';
+import { connect } from "react-redux";
+
+import InfoPanel from "../components/InfoPanel";
 
 const mapStateToProps = state => {
   // console.log("State used for InfoPanel: " + JSON.stringify(state));
@@ -12,12 +14,10 @@ const mapStateToProps = state => {
     workerCostPerTick: state.numWorkerDrones.times(state.workerDroneUpkeep),
 
     salesDrones: state.numSalesDrones,
-    salesCostPerTick: state.numSalesDrones.times(state.salesDroneUpkeep),
+    salesCostPerTick: state.numSalesDrones.times(state.salesDroneUpkeep)
   };
 };
 
-const InfoPanelContainer = connect(
-  mapStateToProps
-)(InfoPanel);
+const InfoPanelContainer = connect(mapStateToProps)(InfoPanel);
 
 export default InfoPanelContainer;

@@ -5,6 +5,7 @@
   "license": "CC-BY-4.0",
   "dependencies": {
     "big-integer": "^1.6.26",
+    "flow-bin": "^0.61.0",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -16,6 +17,18 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "flow": "flow"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "babel-preset-flow": "^6.23.0",
+    "eslint": "^4.13.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "flow-bin": "^0.61.0",
+    "flow-cli": "0.0.0-pre",
+    "flow-scripts": "^0.4.0",
+    "prettier-eslint": "^8.6.0"
   }
 }

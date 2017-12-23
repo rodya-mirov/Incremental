@@ -1,5 +1,21 @@
-class Log {
-  constructor(checkIfFinished, getMessage, getPriority, getTicked, toCopy) {
+// @flow
+
+import bigInt from "big-integer";
+
+export class Log {
+  isFinished: () => boolean;
+  getMessage: () => string;
+  getPriority: () => bigInt;
+  tick: () => void;
+  copy: () => Log;
+
+  constructor(
+    checkIfFinished: () => boolean,
+    getMessage: () => string,
+    getPriority: () => bigInt,
+    getTicked: () => void,
+    toCopy: () => Log
+  ) {
     this.isFinished = checkIfFinished;
     this.getMessage = getMessage;
     this.getPriority = getPriority;
@@ -8,20 +24,32 @@ class Log {
   }
 }
 
-export function eternalLog(message) {
-  return new Log(() => false, () => message, () => 0, () => undefined, () => eternalLog(message));
+export class ExpiringLog extends Log {
+  constructor(message: string, duration: bigInt) {
+    let ticker = {
+      value: duration
+    };
+
+    super(
+      () => ticker.value <= 0,
+      () => message,
+      () => ticker.value,
+      () => {
+        ticker.value = ticker.value <= 0 ? 0 : ticker.value - 1;
+      },
+      () => new ExpiringLog(message, ticker.value)
+    );
+  }
 }
 
-export function expiringLog(message, duration) {
-  let ticker = {
-    value: duration
-  };
-
-  return new Log(
-    () => ticker.value <= 0,
-    () => message,
-    () => ticker.value,
-    () => (ticker.value = (ticker.value <= 0 ? 0 : ticker.value - 1)),
-    () => expiringLog(message, ticker.value)
-  );
+export class EternalLog extends Log {
+  constructor(message: string) {
+    super(
+      () => false,
+      () => message,
+      () => 0,
+      () => undefined,
+      () => new EternalLog(message)
+    );
+  }
 }
