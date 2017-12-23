@@ -1,36 +1,42 @@
-import { connect } from 'react-redux';
-import { makeWidgetsAction, sellWidgetsAction, hireWorkerDronesAction, hireSalesDronesAction } from '../actions';
+// @flow
+import { connect } from "react-redux";
 
-import ProductionButtons from '../components/ProductionButtons';
+import {
+  makeWidgetsAction,
+  sellWidgetsAction,
+  hireWorkerDronesAction,
+  hireSalesDronesAction
+} from "../actions";
+
+import ProductionButtons from "../components/ProductionButtons";
 
 const mapStateToProps = state => {
   return {
     widgetPrice: state.widgetSellPrice,
     workerDronePrice: state.workerDronePrice,
-    salesDronePrice: state.salesDronePrice,
+    salesDronePrice: state.salesDronePrice
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     makeWidget: numWidgets => {
-      dispatch(makeWidgetsAction(numWidgets))
+      dispatch(makeWidgetsAction(numWidgets));
     },
     sellWidget: numWidgets => {
-      dispatch(sellWidgetsAction(numWidgets))
+      dispatch(sellWidgetsAction(numWidgets));
     },
     buyWorkerDrone: numWorkers => {
-      dispatch(hireWorkerDronesAction(numWorkers))
+      dispatch(hireWorkerDronesAction(numWorkers));
     },
     buySalesDrone: numWorkers => {
-      dispatch(hireSalesDronesAction(numWorkers))
-    },
+      dispatch(hireSalesDronesAction(numWorkers));
+    }
   };
 };
 
-const ProductionButtonsContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ProductionButtons);
+const ProductionButtonsContainer = connect(mapStateToProps, mapDispatchToProps)(
+  ProductionButtons
+);
 
 export default ProductionButtonsContainer;

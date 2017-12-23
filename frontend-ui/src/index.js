@@ -1,26 +1,35 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux';
+// @flow
 
-import registerServiceWorker from './registerServiceWorker';
+import React from "react";
+import ReactDOM from "react-dom";
+import { createStore } from "redux";
+import { Provider } from "react-redux";
 
-import App from './components/App';
-import reducer, { initialState } from './reducers';
+import registerServiceWorker from "./registerServiceWorker";
 
-import './index.css';
-import { updateAction } from './actions/index';
+import App from "./components/App";
+import reducer from "./reducers";
+import { initialState } from "./state";
+import { updateAction } from "./actions/index";
 
-const store = createStore(reducer, initialState);
+import "./index.css";
 
-ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById('root')
-);
+let root = document.getElementById("root");
 
-setInterval(() => store.dispatch(updateAction()), 100);
+if (root != null) {
+  const store = createStore(reducer, initialState);
 
-// Boilerplate from the generator; I forgot what it does (efficiency???)
-registerServiceWorker();
+  ReactDOM.render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+    root
+  );
+
+  setInterval(() => store.dispatch(updateAction()), 100);
+
+  // Boilerplate from the generator; I forgot what it does (efficiency???)
+  registerServiceWorker();
+} else {
+  console.error("Could not find DOM element 'root', exploding");
+}
