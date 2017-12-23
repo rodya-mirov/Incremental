@@ -2,27 +2,30 @@
 
 import bigInt from "big-integer";
 
-import {
-  MAKE_WIDGETS,
-  SELL_WIDGETS,
-  HIRE_WORKER_DRONE,
-  UPDATE,
-  HIRE_SALES_DRONE,
-  LOG
-} from "../actionTypes";
-import { ExpiringLog } from "../logs";
 import { initialState } from "../state";
 import type { State } from "../state";
+import type {
+  Action,
+  UpdateAction,
+  MakeWidgetsAction,
+  SellWidgetsAction,
+  HireWorkerDronesAction,
+  HireSalesDronesAction,
+  ExpiringLogAction,
+  EternalLogAction
+} from "../actions";
+import { Log, ExpiringLog, EternalLog } from "../logs";
 
-function makeWidgets(prevState, action) {
-  const numWidgets = prevState.numWidgets.plus(action.numWidgets);
+function handleMakeWidgetsAction(prevState, action: MakeWidgetsAction) {
+  const newNumWidgets = prevState.numWidgets.plus(action.numWidgets);
+
   return {
     ...prevState,
-    numWidgets: numWidgets
+    numWidgets: newNumWidgets
   };
 }
 
-function sellWidgets(prevState, action) {
+function handleSellWidgetsAction(prevState, action: SellWidgetsAction) {
   const toSell = bigInt.min(action.numWidgets, prevState.numWidgets);
   return {
     ...prevState,
@@ -31,11 +34,15 @@ function sellWidgets(prevState, action) {
   };
 }
 
-function buyWorkerDrone(prevState, action) {
+function handleHireWorkerDronesAction(
+  prevState,
+  action: HireWorkerDronesAction
+) {
   const toHire = bigInt.min(
-    action.numWorkerDrones,
+    action.numDrones,
     prevState.amtMoney.divide(prevState.workerDronePrice)
   );
+
   return {
     ...prevState,
     numWorkerDrones: prevState.numWorkerDrones.plus(toHire),
@@ -43,38 +50,47 @@ function buyWorkerDrone(prevState, action) {
   };
 }
 
-function buySalesDrone(prevState, action) {
+function handleHireSalesDronesAction(prevState, action: HireSalesDronesAction) {
   const toHire = bigInt.min(
-    action.numSalesDrones,
+    action.numDrones,
     prevState.amtMoney.divide(prevState.salesDronePrice)
   );
+
+  const spentMoney = toHire.times(prevState.salesDronePrice);
+
   return {
     ...prevState,
     numSalesDrones: prevState.numSalesDrones.plus(toHire),
-    amtMoney: prevState.amtMoney.minus(toHire.times(prevState.salesDronePrice))
+    amtMoney: prevState.amtMoney.minus(spentMoney)
   };
 }
 
-function addLog(prevState, action) {
+function addLog(prevState, log: Log) {
   const newLogs = prevState.logs.map(x => x);
-  newLogs.push(action.log);
+  newLogs.push(log);
 
-  return {
-    ...prevState,
-    logs: newLogs
-  };
+  return { ...prevState, logs: newLogs };
 }
 
-function tryUpkeepTicks(amtMoney, numDrones, eachUpkeep) {
-  const numSuccesses = bigInt.min(numDrones, amtMoney.divide(eachUpkeep));
-  const numFailures = numDrones.minus(numSuccesses);
-  const upkeepPaid = numSuccesses.times(eachUpkeep);
-
-  return { numSuccesses, numFailures, upkeepPaid };
+function handleExpiringLogAction(prevState, action: ExpiringLogAction) {
+  return addLog(prevState, new ExpiringLog(action.message, action.duration));
 }
 
-// TODO: the 'num ticks' functionality is totally unused/ignored for now
-function doUpdate(prevState, action) {
+function handleEternalLogAction(prevState, action: EternalLogAction) {
+  return addLog(prevState, new EternalLog(action.message));
+}
+
+// TODO: action.numTicks is completely ignored
+function handleUpdateAction(prevState, action: UpdateAction) {
+  // helper function to manage the number of drones we could successfully pay upkeep for
+  function tryUpkeepTicks(amtMoney, numDrones, eachUpkeep) {
+    const numSuccesses = bigInt.min(numDrones, amtMoney.divide(eachUpkeep));
+    const numFailures = numDrones.minus(numSuccesses);
+    const upkeepPaid = numSuccesses.times(eachUpkeep);
+
+    return { numSuccesses, numFailures, upkeepPaid };
+  }
+
   const logs = prevState.logs
     .map(log => {
       let newLog = log.copy();
@@ -120,8 +136,8 @@ function doUpdate(prevState, action) {
 
   const newSalesDrones = doSalesUpkeep.numSuccesses;
   const actualSales = bigInt.min(
-    doSalesUpkeep.numSuccesses,
-    prevState.numWidgets.divide(prevState.salesDroneProduction)
+    doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction),
+    prevState.numWidgets
   );
   // TODO BUG: can sell more widgets than actually exist
   newMoney = newMoney.minus(doSalesUpkeep.upkeepPaid);
@@ -157,38 +173,34 @@ function doUpdate(prevState, action) {
   };
 }
 
-function mainReducer(prevState: State = initialState, action): State {
+function mainReducer(prevState: State = initialState, action: Action): State {
   switch (action.type) {
-    // user actions ...
-    case MAKE_WIDGETS:
-      return makeWidgets(prevState, action);
-    case SELL_WIDGETS:
-      return sellWidgets(prevState, action);
-    case HIRE_WORKER_DRONE:
-      return buyWorkerDrone(prevState, action);
-    case HIRE_SALES_DRONE:
-      return buySalesDrone(prevState, action);
+    // TODO: see if flow will handle this error (otherwise do put everything in here)
+    case "UPDATE":
+      return handleUpdateAction(prevState, action);
 
-    // time-based events ...
-    case UPDATE:
-      return doUpdate(prevState, action);
+    case "MAKE_WIDGETS":
+      return handleMakeWidgetsAction(prevState, action);
 
-    // system-generated events ...
-    case LOG:
-      return addLog(prevState, action);
+    case "SELL_WIDGETS":
+      return handleSellWidgetsAction(prevState, action);
 
-    // error handling
+    case "HIRE_WORKER_DRONES":
+      return handleHireWorkerDronesAction(prevState, action);
+
+    case "HIRE_SALES_DRONES":
+      return handleHireSalesDronesAction(prevState, action);
+
+    case "ADD_ETERNAL_LOG":
+      return handleEternalLogAction(prevState, action);
+
+    case "ADD_EXPIRING_LOG":
+      return handleExpiringLogAction(prevState, action);
+
     default:
-      console.error(
-        "Unrecognized action type: " +
-          action.type +
-          "; action was '" +
-          JSON.stringify(action) +
-          "'"
-      );
+      console.error("Unsupported action type", action.type);
       return prevState;
   }
 }
 
-export { initialState };
 export default mainReducer;
