@@ -1,15 +1,20 @@
 // @flow
 
 import React from "react";
-import PropTypes from "prop-types";
 import bigInt from "big-integer";
 
 type Props = {
   money: bigInt,
+  materials: bigInt,
   widgets: bigInt,
+
+  buyerDrones: bigInt,
+  buyerCostPerTick: bigInt,
+
   workerDrones: bigInt,
-  salesDrones: bigInt,
   workerCostPerTick: bigInt,
+
+  salesDrones: bigInt,
   salesCostPerTick: bigInt
 };
 
@@ -24,8 +29,18 @@ const InfoPanel = (props: Props) => (
         <td>${props.money.toString()}</td>
       </tr>
       <tr>
+        <td>Materials:</td>
+        <td>{props.materials.toString()}</td>
+      </tr>
+      <tr>
         <td>Widgets:</td>
         <td>{props.widgets.toString()}</td>
+      </tr>
+      <tr>
+        <td>Buyer Drones:</td>
+        <td>{props.buyerDrones.toString()}</td>
+        <td>Cost/Tick:</td>
+        <td>${props.buyerCostPerTick.toString()}</td>
       </tr>
       <tr>
         <td>Worker Drones:</td>
@@ -42,16 +57,5 @@ const InfoPanel = (props: Props) => (
     </tbody>
   </table>
 );
-
-InfoPanel.propTypes = {
-  money: PropTypes.instanceOf(bigInt).isRequired, // amount of money owned
-  widgets: PropTypes.instanceOf(bigInt).isRequired, // amount of widgets owned
-
-  workerDrones: PropTypes.instanceOf(bigInt).isRequired,
-  workerCostPerTick: PropTypes.instanceOf(bigInt).isRequired,
-
-  salesDrones: PropTypes.instanceOf(bigInt).isRequired,
-  salesCostPerTick: PropTypes.instanceOf(bigInt).isRequired
-};
 
 export default InfoPanel;

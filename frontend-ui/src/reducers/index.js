@@ -7,8 +7,10 @@ import type { State } from "../state";
 import type {
   Action,
   UpdateAction,
+  BuyMaterialsAction,
   MakeWidgetsAction,
   SellWidgetsAction,
+  HireBuyerDronesAction,
   HireWorkerDronesAction,
   HireSalesDronesAction,
   ExpiringLogAction,
@@ -16,52 +18,122 @@ import type {
 } from "../actions";
 import { Log, ExpiringLog, EternalLog } from "../logs";
 
-function handleMakeWidgetsAction(prevState, action: MakeWidgetsAction) {
-  const newNumWidgets = prevState.numWidgets.plus(action.numWidgets);
+type TransactionResult = {
+  successes: bigInt,
+  failures: bigInt,
+  inputConsumed: bigInt,
+  outputProduced: bigInt
+};
+
+function transactionHelper(
+  numAttempts: bigInt,
+  availableResources: bigInt,
+  transactionCost: bigInt | number,
+  transactionBenefit: bigInt | number
+): TransactionResult {
+  let successes = bigInt.min(
+    numAttempts,
+    availableResources.divide(transactionCost) // intentionally: no fractional production
+  );
+  let failures = numAttempts.minus(successes);
+  let inputConsumed = successes.times(transactionCost);
+  let outputProduced = successes.times(transactionBenefit);
 
   return {
-    ...prevState,
-    numWidgets: newNumWidgets
+    successes,
+    failures,
+    inputConsumed,
+    outputProduced
   };
 }
 
-function handleSellWidgetsAction(prevState, action: SellWidgetsAction) {
-  const toSell = bigInt.min(action.numWidgets, prevState.numWidgets);
-  return {
-    ...prevState,
-    numWidgets: prevState.numWidgets.minus(toSell),
-    amtMoney: prevState.amtMoney.plus(toSell.times(prevState.widgetSellPrice))
-  };
-}
-
-function handleHireWorkerDronesAction(
-  prevState,
-  action: HireWorkerDronesAction
-) {
-  const toHire = bigInt.min(
-    action.numDrones,
-    prevState.amtMoney.divide(prevState.workerDronePrice)
+function buyMaterials(prevState: State, numMaterials: bigInt): State {
+  let result = transactionHelper(
+    numMaterials,
+    prevState.amtMoney,
+    prevState.materialBuyPrice,
+    1
   );
 
   return {
     ...prevState,
-    numWorkerDrones: prevState.numWorkerDrones.plus(toHire),
-    amtMoney: prevState.amtMoney.minus(toHire.times(prevState.workerDronePrice))
+    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
+    numMaterials: prevState.numMaterials.plus(result.outputProduced)
   };
 }
 
-function handleHireSalesDronesAction(prevState, action: HireSalesDronesAction) {
-  const toHire = bigInt.min(
-    action.numDrones,
-    prevState.amtMoney.divide(prevState.salesDronePrice)
+function makeWidgets(prevState: State, numWidgets: bigInt): State {
+  let result = transactionHelper(
+    numWidgets,
+    prevState.numMaterials,
+    prevState.materialsPerWidget,
+    1
   );
-
-  const spentMoney = toHire.times(prevState.salesDronePrice);
 
   return {
     ...prevState,
-    numSalesDrones: prevState.numSalesDrones.plus(toHire),
-    amtMoney: prevState.amtMoney.minus(spentMoney)
+    numWidgets: prevState.numWidgets.plus(result.outputProduced),
+    numMaterials: prevState.numMaterials.minus(result.inputConsumed)
+  };
+}
+
+function sellWidgets(prevState: State, numWidgets: bigInt): State {
+  let result = transactionHelper(
+    numWidgets,
+    prevState.numWidgets,
+    1,
+    prevState.widgetSellPrice
+  );
+
+  return {
+    ...prevState,
+    numWidgets: prevState.numWidgets.minus(result.inputConsumed),
+    amtMoney: prevState.amtMoney.plus(result.outputProduced)
+  };
+}
+
+function hireBuyerDrones(prevState: State, numDrones: bigInt): State {
+  let result = transactionHelper(
+    numDrones,
+    prevState.amtMoney,
+    prevState.buyerDronePrice,
+    1
+  );
+
+  return {
+    ...prevState,
+    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
+    numBuyerDrones: prevState.numBuyerDrones.plus(result.outputProduced)
+  };
+}
+
+function hireWorkerDrones(prevState: State, numDrones: bigInt): State {
+  let result = transactionHelper(
+    numDrones,
+    prevState.amtMoney,
+    prevState.workerDronePrice,
+    1
+  );
+
+  return {
+    ...prevState,
+    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
+    numWorkerDrones: prevState.numWorkerDrones.plus(result.outputProduced)
+  };
+}
+
+function hireSalesDrones(prevState: State, numDrones: bigInt): State {
+  let result = transactionHelper(
+    numDrones,
+    prevState.amtMoney,
+    prevState.salesDronePrice,
+    1
+  );
+
+  return {
+    ...prevState,
+    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
+    numSalesDrones: prevState.numSalesDrones.plus(result.outputProduced)
   };
 }
 
@@ -72,6 +144,33 @@ function addLog(prevState, log: Log) {
   return { ...prevState, logs: newLogs };
 }
 
+function handleBuyMaterialsAction(prevState, action: BuyMaterialsAction) {
+  return buyMaterials(prevState, action.numMaterials);
+}
+
+function handleMakeWidgetsAction(prevState, action: MakeWidgetsAction) {
+  return makeWidgets(prevState, action.numWidgets);
+}
+
+function handleSellWidgetsAction(prevState, action: SellWidgetsAction) {
+  return sellWidgets(prevState, action.numWidgets);
+}
+
+function handleHireBuyerDronesAction(prevState, action: HireBuyerDronesAction) {
+  return hireBuyerDrones(prevState, action.numDrones);
+}
+
+function handleHireWorkerDronesAction(
+  prevState,
+  action: HireWorkerDronesAction
+) {
+  return hireWorkerDrones(prevState, action.numDrones);
+}
+
+function handleHireSalesDronesAction(prevState, action: HireSalesDronesAction) {
+  return hireSalesDrones(prevState, action.numDrones);
+}
+
 function handleExpiringLogAction(prevState, action: ExpiringLogAction) {
   return addLog(prevState, new ExpiringLog(action.message, action.duration));
 }
@@ -80,17 +179,84 @@ function handleEternalLogAction(prevState, action: EternalLogAction) {
   return addLog(prevState, new EternalLog(action.message));
 }
 
-// TODO: action.numTicks is completely ignored
-function handleUpdateAction(prevState, action: UpdateAction) {
-  // helper function to manage the number of drones we could successfully pay upkeep for
-  function tryUpkeepTicks(amtMoney, numDrones, eachUpkeep) {
-    const numSuccesses = bigInt.min(numDrones, amtMoney.divide(eachUpkeep));
-    const numFailures = numDrones.minus(numSuccesses);
-    const upkeepPaid = numSuccesses.times(eachUpkeep);
+function payBuyerDroneUpkeep(prevState: State): State {
+  let result = transactionHelper(
+    prevState.numBuyerDrones,
+    prevState.amtMoney,
+    prevState.buyerDroneUpkeep,
+    0
+  );
 
-    return { numSuccesses, numFailures, upkeepPaid };
+  if (result.failures > 0) {
+    let message =
+      "Lost " +
+      result.failures +
+      " buyer drones because their salary could not be paid!";
+    prevState = addLog(prevState, new ExpiringLog(message, 100));
   }
 
+  return {
+    ...prevState,
+    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
+    numBuyerDrones: result.successes
+  };
+}
+
+function payWorkerDroneUpkeep(prevState: State): State {
+  let result = transactionHelper(
+    prevState.numWorkerDrones,
+    prevState.amtMoney,
+    prevState.workerDroneUpkeep,
+    0
+  );
+
+  if (result.failures > 0) {
+    let message =
+      "Lost " +
+      result.failures +
+      " worker drones because their salary could not be paid!";
+    prevState = addLog(prevState, new ExpiringLog(message, 100));
+  }
+
+  return {
+    ...prevState,
+    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
+    numWorkerDrones: result.successes
+  };
+}
+
+function paySalesDroneUpkeep(prevState: State): State {
+  let result = transactionHelper(
+    prevState.numSalesDrones,
+    prevState.amtMoney,
+    prevState.salesDroneUpkeep,
+    0
+  );
+
+  if (result.failures > 0) {
+    let message =
+      "Lost " +
+      result.failures +
+      " sales drones because their salary could not be paid!";
+    prevState = addLog(prevState, new ExpiringLog(message, 100));
+  }
+
+  return {
+    ...prevState,
+    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
+    numSalesDrones: result.successes
+  };
+}
+
+function payAllUpkeep(prevState: State): State {
+  prevState = payBuyerDroneUpkeep(prevState);
+  prevState = payWorkerDroneUpkeep(prevState);
+  prevState = paySalesDroneUpkeep(prevState);
+
+  return prevState;
+}
+
+function sortAndPruneLogs(prevState: State): State {
   const logs = prevState.logs
     .map(log => {
       let newLog = log.copy();
@@ -100,84 +266,37 @@ function handleUpdateAction(prevState, action: UpdateAction) {
     .filter(log => !log.isFinished())
     .sort((a, b) => a.getPriority() - b.getPriority());
 
-  let newWidgets = prevState.numWidgets;
-  let newMoney = prevState.amtMoney;
+  return { ...prevState, logs };
+}
 
-  // Worker drone upkeep
-  const doWorkerUpkeep = tryUpkeepTicks(
-    newMoney,
-    prevState.numWorkerDrones,
-    prevState.workerDroneUpkeep
+// TODO: action.numTicks is completely ignored
+function handleUpdateAction(prevState, action: UpdateAction) {
+  prevState = sortAndPruneLogs(prevState);
+  prevState = payAllUpkeep(prevState);
+
+  prevState = buyMaterials(
+    prevState,
+    prevState.buyerDroneProduction.times(prevState.numBuyerDrones)
+  );
+  prevState = makeWidgets(
+    prevState,
+    prevState.workerDroneProduction.times(prevState.numWorkerDrones)
+  );
+  prevState = sellWidgets(
+    prevState,
+    prevState.salesDroneProduction.times(prevState.numSalesDrones)
   );
 
-  const newWorkerDrones = doWorkerUpkeep.numSuccesses;
-  newMoney = newMoney.minus(doWorkerUpkeep.upkeepPaid);
-  newWidgets = newWidgets.plus(
-    doWorkerUpkeep.numSuccesses.times(prevState.workerDroneProduction)
-  );
-
-  if (doWorkerUpkeep.numFailures > 0) {
-    logs.push(
-      new ExpiringLog(
-        "Due to failed upkeep, had to fire " +
-          doWorkerUpkeep.numFailures.toString() +
-          " worker drones!",
-        100
-      )
-    );
-  }
-
-  // Sales drone upkeep
-  const doSalesUpkeep = tryUpkeepTicks(
-    newMoney,
-    prevState.numSalesDrones,
-    prevState.salesDroneUpkeep
-  );
-
-  const newSalesDrones = doSalesUpkeep.numSuccesses;
-  const actualSales = bigInt.min(
-    doSalesUpkeep.numSuccesses.times(prevState.salesDroneProduction),
-    prevState.numWidgets
-  );
-  // TODO BUG: can sell more widgets than actually exist
-  newMoney = newMoney.minus(doSalesUpkeep.upkeepPaid);
-  newMoney = newMoney.plus(
-    actualSales
-      .times(prevState.salesDroneProduction)
-      .times(prevState.widgetSellPrice)
-  );
-  newWidgets = newWidgets.minus(
-    actualSales.times(prevState.salesDroneProduction)
-  );
-
-  if (doSalesUpkeep.numFailures > 0) {
-    logs.push(
-      new ExpiringLog(
-        "Due to failed upkeep, had to fire " +
-          doSalesUpkeep.numFailures.toString() +
-          " sales drones!",
-        100
-      )
-    );
-  }
-
-  return {
-    ...prevState,
-    logs: logs,
-
-    numWidgets: newWidgets,
-    amtMoney: newMoney,
-
-    numWorkerDrones: newWorkerDrones,
-    numSalesDrones: newSalesDrones
-  };
+  return prevState;
 }
 
 function mainReducer(prevState: State = initialState, action: Action): State {
   switch (action.type) {
-    // TODO: see if flow will handle this error (otherwise do put everything in here)
     case "UPDATE":
       return handleUpdateAction(prevState, action);
+
+    case "BUY_MATERIALS":
+      return handleBuyMaterialsAction(prevState, action);
 
     case "MAKE_WIDGETS":
       return handleMakeWidgetsAction(prevState, action);
@@ -187,6 +306,9 @@ function mainReducer(prevState: State = initialState, action: Action): State {
 
     case "HIRE_WORKER_DRONES":
       return handleHireWorkerDronesAction(prevState, action);
+
+    case "HIRE_BUYER_DRONES":
+      return handleHireBuyerDronesAction(prevState, action);
 
     case "HIRE_SALES_DRONES":
       return handleHireSalesDronesAction(prevState, action);

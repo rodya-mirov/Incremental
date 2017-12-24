@@ -7,6 +7,11 @@ export type UpdateAction = {
   numTicks: bigInt
 };
 
+export type BuyMaterialsAction = {
+  type: "BUY_MATERIALS",
+  numMaterials: bigInt
+};
+
 export type MakeWidgetsAction = {
   type: "MAKE_WIDGETS",
   numWidgets: bigInt
@@ -15,6 +20,11 @@ export type MakeWidgetsAction = {
 export type SellWidgetsAction = {
   type: "SELL_WIDGETS",
   numWidgets: bigInt
+};
+
+export type HireBuyerDronesAction = {
+  type: "HIRE_BUYER_DRONES",
+  numDrones: bigInt
 };
 
 export type HireWorkerDronesAction = {
@@ -40,12 +50,23 @@ export type ExpiringLogAction = {
 
 export type Action =
   | UpdateAction
+  | BuyMaterialsAction
   | MakeWidgetsAction
   | SellWidgetsAction
+  | HireBuyerDronesAction
   | HireWorkerDronesAction
   | HireSalesDronesAction
   | EternalLogAction
   | ExpiringLogAction;
+
+export function buyMaterialsAction(
+  numMaterials: bigInt = bigInt(1)
+): BuyMaterialsAction {
+  return {
+    type: "BUY_MATERIALS",
+    numMaterials: numMaterials
+  };
+}
 
 export function makeWidgetsAction(
   numWidgets: bigInt = bigInt(1)
@@ -62,6 +83,15 @@ export function sellWidgetsAction(
   return {
     type: "SELL_WIDGETS",
     numWidgets: numWidgets
+  };
+}
+
+export function hireBuyerDronesAction(
+  numBuyerDrones: bigInt = bigInt(1)
+): HireBuyerDronesAction {
+  return {
+    type: "HIRE_BUYER_DRONES",
+    numDrones: numBuyerDrones
   };
 }
 

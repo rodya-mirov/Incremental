@@ -1,7 +1,6 @@
 // @flow
 
 import React from "react";
-import PropTypes from "prop-types";
 
 import LogRow from "./LogRow";
 import { Log } from "../logs";
@@ -19,9 +18,5 @@ const LogPanel = (props: { logs: Array<Log> }) => (
     </table>
   </div>
 );
-
-LogPanel.propTypes = {
-  logs: PropTypes.arrayOf(PropTypes.any).isRequired
-};
 
 export default LogPanel;
