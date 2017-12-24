@@ -1,18 +1,19 @@
 // @flow
 
 import bigInt from "big-integer";
+import { BigInteger } from "big-integer-types";
 
 export class Log {
   isFinished: () => boolean;
   getMessage: () => string;
-  getPriority: () => bigInt;
+  getPriority: () => BigInteger;
   tick: () => void;
   copy: () => Log;
 
   constructor(
     checkIfFinished: () => boolean,
     getMessage: () => string,
-    getPriority: () => bigInt,
+    getPriority: () => BigInteger,
     getTicked: () => void,
     toCopy: () => Log
   ) {
@@ -25,17 +26,18 @@ export class Log {
 }
 
 export class ExpiringLog extends Log {
-  constructor(message: string, duration: bigInt) {
+  constructor(message: string, duration: BigInteger) {
     let ticker = {
       value: duration
     };
 
     super(
-      () => ticker.value <= 0,
+      () => ticker.value.compare(0) <= 0,
       () => message,
       () => ticker.value,
       () => {
-        ticker.value = ticker.value <= 0 ? 0 : ticker.value - 1;
+        ticker.value =
+          ticker.value.compare(0) <= 0 ? bigInt(0) : ticker.value.minus(1);
       },
       () => new ExpiringLog(message, ticker.value)
     );
@@ -47,7 +49,7 @@ export class EternalLog extends Log {
     super(
       () => false,
       () => message,
-      () => 0,
+      () => bigInt(0),
       () => undefined,
       () => new EternalLog(message)
     );

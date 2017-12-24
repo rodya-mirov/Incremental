@@ -1,6 +1,7 @@
 // @flow
 
 import bigInt from "big-integer";
+import { BigInteger } from "big-integer-types";
 
 import { initialState } from "../state";
 import type { State } from "../state";
@@ -19,17 +20,17 @@ import type {
 import { Log, ExpiringLog, EternalLog } from "../logs";
 
 type TransactionResult = {
-  successes: bigInt,
-  failures: bigInt,
-  inputConsumed: bigInt,
-  outputProduced: bigInt
+  successes: BigInteger,
+  failures: BigInteger,
+  inputConsumed: BigInteger,
+  outputProduced: BigInteger
 };
 
 function transactionHelper(
-  numAttempts: bigInt,
-  availableResources: bigInt,
-  transactionCost: bigInt | number,
-  transactionBenefit: bigInt | number
+  numAttempts: BigInteger,
+  availableResources: BigInteger,
+  transactionCost: BigInteger | number,
+  transactionBenefit: BigInteger | number
 ): TransactionResult {
   let successes = bigInt.min(
     numAttempts,
@@ -47,7 +48,7 @@ function transactionHelper(
   };
 }
 
-function buyMaterials(prevState: State, numMaterials: bigInt): State {
+function buyMaterials(prevState: State, numMaterials: BigInteger): State {
   let result = transactionHelper(
     numMaterials,
     prevState.amtMoney,
@@ -62,7 +63,7 @@ function buyMaterials(prevState: State, numMaterials: bigInt): State {
   };
 }
 
-function makeWidgets(prevState: State, numWidgets: bigInt): State {
+function makeWidgets(prevState: State, numWidgets: BigInteger): State {
   let result = transactionHelper(
     numWidgets,
     prevState.numMaterials,
@@ -77,7 +78,7 @@ function makeWidgets(prevState: State, numWidgets: bigInt): State {
   };
 }
 
-function sellWidgets(prevState: State, numWidgets: bigInt): State {
+function sellWidgets(prevState: State, numWidgets: BigInteger): State {
   let result = transactionHelper(
     numWidgets,
     prevState.numWidgets,
@@ -92,7 +93,7 @@ function sellWidgets(prevState: State, numWidgets: bigInt): State {
   };
 }
 
-function hireBuyerDrones(prevState: State, numDrones: bigInt): State {
+function hireBuyerDrones(prevState: State, numDrones: BigInteger): State {
   let result = transactionHelper(
     numDrones,
     prevState.amtMoney,
@@ -107,7 +108,7 @@ function hireBuyerDrones(prevState: State, numDrones: bigInt): State {
   };
 }
 
-function hireWorkerDrones(prevState: State, numDrones: bigInt): State {
+function hireWorkerDrones(prevState: State, numDrones: BigInteger): State {
   let result = transactionHelper(
     numDrones,
     prevState.amtMoney,
@@ -122,7 +123,7 @@ function hireWorkerDrones(prevState: State, numDrones: bigInt): State {
   };
 }
 
-function hireSalesDrones(prevState: State, numDrones: bigInt): State {
+function hireSalesDrones(prevState: State, numDrones: BigInteger): State {
   let result = transactionHelper(
     numDrones,
     prevState.amtMoney,
@@ -187,12 +188,12 @@ function payBuyerDroneUpkeep(prevState: State): State {
     0
   );
 
-  if (result.failures > 0) {
+  if (result.failures.compare(0) > 0) {
     let message =
       "Lost " +
-      result.failures +
+      result.failures.toString() +
       " buyer drones because their salary could not be paid!";
-    prevState = addLog(prevState, new ExpiringLog(message, 100));
+    prevState = addLog(prevState, new ExpiringLog(message, bigInt(100)));
   }
 
   return {
@@ -210,12 +211,12 @@ function payWorkerDroneUpkeep(prevState: State): State {
     0
   );
 
-  if (result.failures > 0) {
+  if (result.failures.compare(0) > 0) {
     let message =
       "Lost " +
-      result.failures +
+      result.failures.toString() +
       " worker drones because their salary could not be paid!";
-    prevState = addLog(prevState, new ExpiringLog(message, 100));
+    prevState = addLog(prevState, new ExpiringLog(message, bigInt(100)));
   }
 
   return {
@@ -233,12 +234,12 @@ function paySalesDroneUpkeep(prevState: State): State {
     0
   );
 
-  if (result.failures > 0) {
+  if (result.failures.compare(0) > 0) {
     let message =
       "Lost " +
-      result.failures +
+      result.failures.toString() +
       " sales drones because their salary could not be paid!";
-    prevState = addLog(prevState, new ExpiringLog(message, 100));
+    prevState = addLog(prevState, new ExpiringLog(message, bigInt(100)));
   }
 
   return {
@@ -264,7 +265,12 @@ function sortAndPruneLogs(prevState: State): State {
       return newLog;
     })
     .filter(log => !log.isFinished())
-    .sort((a, b) => a.getPriority() - b.getPriority());
+    .sort((a, b) =>
+      a
+        .getPriority()
+        .minus(b.getPriority())
+        .compare(0)
+    );
 
   return { ...prevState, logs };
 }

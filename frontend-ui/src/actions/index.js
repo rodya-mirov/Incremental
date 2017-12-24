@@ -1,40 +1,41 @@
 // @flow
 
 import bigInt from "big-integer";
+import { BigInteger } from "big-integer-types";
 
 export type UpdateAction = {
   type: "UPDATE",
-  numTicks: bigInt
+  numTicks: BigInteger
 };
 
 export type BuyMaterialsAction = {
   type: "BUY_MATERIALS",
-  numMaterials: bigInt
+  numMaterials: BigInteger
 };
 
 export type MakeWidgetsAction = {
   type: "MAKE_WIDGETS",
-  numWidgets: bigInt
+  numWidgets: BigInteger
 };
 
 export type SellWidgetsAction = {
   type: "SELL_WIDGETS",
-  numWidgets: bigInt
+  numWidgets: BigInteger
 };
 
 export type HireBuyerDronesAction = {
   type: "HIRE_BUYER_DRONES",
-  numDrones: bigInt
+  numDrones: BigInteger
 };
 
 export type HireWorkerDronesAction = {
   type: "HIRE_WORKER_DRONES",
-  numDrones: bigInt
+  numDrones: BigInteger
 };
 
 export type HireSalesDronesAction = {
   type: "HIRE_SALES_DRONES",
-  numDrones: bigInt
+  numDrones: BigInteger
 };
 
 export type EternalLogAction = {
@@ -45,7 +46,7 @@ export type EternalLogAction = {
 export type ExpiringLogAction = {
   type: "ADD_EXPIRING_LOG",
   message: string,
-  duration: bigInt
+  duration: BigInteger
 };
 
 export type Action =
@@ -60,7 +61,7 @@ export type Action =
   | ExpiringLogAction;
 
 export function buyMaterialsAction(
-  numMaterials: bigInt = bigInt(1)
+  numMaterials: BigInteger = bigInt(1)
 ): BuyMaterialsAction {
   return {
     type: "BUY_MATERIALS",
@@ -69,7 +70,7 @@ export function buyMaterialsAction(
 }
 
 export function makeWidgetsAction(
-  numWidgets: bigInt = bigInt(1)
+  numWidgets: BigInteger = bigInt(1)
 ): MakeWidgetsAction {
   return {
     type: "MAKE_WIDGETS",
@@ -78,7 +79,7 @@ export function makeWidgetsAction(
 }
 
 export function sellWidgetsAction(
-  numWidgets: bigInt = bigInt(1)
+  numWidgets: BigInteger = bigInt(1)
 ): SellWidgetsAction {
   return {
     type: "SELL_WIDGETS",
@@ -87,7 +88,7 @@ export function sellWidgetsAction(
 }
 
 export function hireBuyerDronesAction(
-  numBuyerDrones: bigInt = bigInt(1)
+  numBuyerDrones: BigInteger = bigInt(1)
 ): HireBuyerDronesAction {
   return {
     type: "HIRE_BUYER_DRONES",
@@ -96,7 +97,7 @@ export function hireBuyerDronesAction(
 }
 
 export function hireWorkerDronesAction(
-  numWorkerDrones: bigInt = bigInt(1)
+  numWorkerDrones: BigInteger = bigInt(1)
 ): HireWorkerDronesAction {
   return {
     type: "HIRE_WORKER_DRONES",
@@ -105,7 +106,7 @@ export function hireWorkerDronesAction(
 }
 
 export function hireSalesDronesAction(
-  numSalesDrones: bigInt = bigInt(1)
+  numSalesDrones: BigInteger = bigInt(1)
 ): HireSalesDronesAction {
   return {
     type: "HIRE_SALES_DRONES",
@@ -115,7 +116,7 @@ export function hireSalesDronesAction(
 
 export function expiringLogAction(
   message: string,
-  duration: bigInt
+  duration: BigInteger
 ): ExpiringLogAction {
   return {
     type: "ADD_EXPIRING_LOG",
@@ -131,6 +132,6 @@ export function eternalLogAction(message: string): EternalLogAction {
   };
 }
 
-export function updateAction(numTicks: bigInt): UpdateAction {
+export function updateAction(numTicks: BigInteger = bigInt(1)): UpdateAction {
   return { type: "UPDATE", numTicks: numTicks };
 }

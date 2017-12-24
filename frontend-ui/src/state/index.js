@@ -1,31 +1,32 @@
 // @flow
 
 import bigInt from "big-integer";
+import { BigInteger } from "big-integer-types";
 import { Log } from "../logs";
 
 export type State = {
-  amtMoney: bigInt,
-  numWidgets: bigInt,
-  numMaterials: bigInt,
+  amtMoney: BigInteger,
+  numWidgets: BigInteger,
+  numMaterials: BigInteger,
 
-  materialBuyPrice: bigInt,
-  materialsPerWidget: bigInt, // number of materials required to produce a widget
-  widgetSellPrice: bigInt,
+  materialBuyPrice: BigInteger,
+  materialsPerWidget: BigInteger, // number of materials required to produce a widget
+  widgetSellPrice: BigInteger,
 
-  numBuyerDrones: bigInt,
-  buyerDronePrice: bigInt,
-  buyerDroneUpkeep: bigInt,
-  buyerDroneProduction: bigInt,
+  numBuyerDrones: BigInteger,
+  buyerDronePrice: BigInteger,
+  buyerDroneUpkeep: BigInteger,
+  buyerDroneProduction: BigInteger,
 
-  numWorkerDrones: bigInt,
-  workerDronePrice: bigInt,
-  workerDroneUpkeep: bigInt,
-  workerDroneProduction: bigInt,
+  numWorkerDrones: BigInteger,
+  workerDronePrice: BigInteger,
+  workerDroneUpkeep: BigInteger,
+  workerDroneProduction: BigInteger,
 
-  numSalesDrones: bigInt,
-  salesDronePrice: bigInt,
-  salesDroneUpkeep: bigInt,
-  salesDroneProduction: bigInt,
+  numSalesDrones: BigInteger,
+  salesDronePrice: BigInteger,
+  salesDroneUpkeep: BigInteger,
+  salesDroneProduction: BigInteger,
 
   logs: Array<Log>
 };
