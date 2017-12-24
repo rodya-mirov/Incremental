@@ -3,23 +3,24 @@
 import React from "react";
 
 import bigInt from "big-integer";
+import { BigInteger } from "big-integer-types";
 
 type ProductionButtonsProps = {
-  buyMaterials: bigInt => void,
-  materialsPrice: bigInt,
-  makeWidget: bigInt => void,
-  materialsPerWidget: bigInt,
-  sellWidget: bigInt => void,
-  widgetPrice: bigInt,
-  buyBuyerDrone: bigInt => void,
-  buyerDronePrice: bigInt,
-  buyWorkerDrone: bigInt => void,
-  workerDronePrice: bigInt,
-  buySalesDrone: bigInt => void,
-  salesDronePrice: bigInt
+  buyMaterials: BigInteger => void,
+  materialsPrice: BigInteger,
+  makeWidget: BigInteger => void,
+  materialsPerWidget: BigInteger,
+  sellWidget: BigInteger => void,
+  widgetPrice: BigInteger,
+  buyBuyerDrone: BigInteger => void,
+  buyerDronePrice: BigInteger,
+  buyWorkerDrone: BigInteger => void,
+  workerDronePrice: BigInteger,
+  buySalesDrone: BigInteger => void,
+  salesDronePrice: BigInteger
 };
 
-const ButtonComponent = (props: { onClick: void => void, text: string }) => {
+const ButtonComponent = (props: { onClick: () => void, text: string }) => {
   return (
     <td>
       <button onClick={props.onClick}>{props.text}</button>

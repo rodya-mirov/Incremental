@@ -2,20 +2,21 @@
 
 import React from "react";
 import bigInt from "big-integer";
+import { BigInteger } from "big-integer-types";
 
 type Props = {
-  money: bigInt,
-  materials: bigInt,
-  widgets: bigInt,
+  money: BigInteger,
+  materials: BigInteger,
+  widgets: BigInteger,
 
-  buyerDrones: bigInt,
-  buyerCostPerTick: bigInt,
+  buyerDrones: BigInteger,
+  buyerCostPerTick: BigInteger,
 
-  workerDrones: bigInt,
-  workerCostPerTick: bigInt,
+  workerDrones: BigInteger,
+  workerCostPerTick: BigInteger,
 
-  salesDrones: bigInt,
-  salesCostPerTick: bigInt
+  salesDrones: BigInteger,
+  salesCostPerTick: BigInteger
 };
 
 /**
