@@ -1,18 +1,30 @@
 // @flow
 
 import React from "react";
-import PropTypes from "prop-types";
 
 import bigInt from "big-integer";
 
 type ProductionButtonsProps = {
-  makeWidget: (number | bigInt) => void,
-  sellWidget: (number | bigInt) => void,
+  buyMaterials: bigInt => void,
+  materialsPrice: bigInt,
+  makeWidget: bigInt => void,
+  materialsPerWidget: bigInt,
+  sellWidget: bigInt => void,
   widgetPrice: bigInt,
-  buyWorkerDrone: (number | bigInt) => void,
+  buyBuyerDrone: bigInt => void,
+  buyerDronePrice: bigInt,
+  buyWorkerDrone: bigInt => void,
   workerDronePrice: bigInt,
-  buySalesDrone: (number | bigInt) => void,
+  buySalesDrone: bigInt => void,
   salesDronePrice: bigInt
+};
+
+const ButtonComponent = (props: { onClick: void => void, text: string }) => {
+  return (
+    <td>
+      <button onClick={props.onClick}>{props.text}</button>
+    </td>
+  );
 };
 
 /**
@@ -20,27 +32,43 @@ type ProductionButtonsProps = {
  */
 const ProductionButtons = (props: ProductionButtonsProps) => (
   <div className="productionButtons">
-    <button onClick={() => props.makeWidget(1)}>Make Widget</button>
-    <button onClick={() => props.sellWidget(1)}>
-      Sell Widget (for ${props.widgetPrice.toString()})
-    </button>
-    <button onClick={() => props.buyWorkerDrone(1)}>
-      Hire Worker Drone (for ${props.workerDronePrice.toString()})
-    </button>
-    <button onClick={() => props.buySalesDrone(1)}>
-      Hire Sales Drone (for ${props.salesDronePrice.toString()})
-    </button>
+    <table>
+      <tr>
+        <ButtonComponent
+          onClick={() => props.buyMaterials(bigInt(1))}
+          text={"Buy Materials (for $" + props.materialsPrice.toString() + ")"}
+        />
+        <ButtonComponent
+          onClick={() => props.makeWidget(bigInt(1))}
+          text={"Make Widget (for M" + props.materialsPrice.toString() + ")"}
+        />
+        <ButtonComponent
+          onClick={() => props.sellWidget(bigInt(1))}
+          text={"Sell Widget (for $" + props.materialsPrice.toString() + ")"}
+        />
+      </tr>
+      <tr>
+        <ButtonComponent
+          onClick={() => props.buyBuyerDrone(bigInt(1))}
+          text={
+            "Hire Buyer Drone (for $" + props.buyerDronePrice.toString() + ")"
+          }
+        />
+        <ButtonComponent
+          onClick={() => props.buyWorkerDrone(bigInt(1))}
+          text={
+            "Hire Worker Drone (for $" + props.workerDronePrice.toString() + ")"
+          }
+        />
+        <ButtonComponent
+          onClick={() => props.buySalesDrone(bigInt(1))}
+          text={
+            "Hire Sales Drone (for $" + props.salesDronePrice.toString() + ")"
+          }
+        />
+      </tr>
+    </table>
   </div>
 );
-
-ProductionButtons.propTypes = {
-  makeWidget: PropTypes.func.isRequired, // make a new widget
-  sellWidget: PropTypes.func.isRequired, // sell an existing widget for money
-  widgetPrice: PropTypes.instanceOf(bigInt).isRequired, // price of a widget (selling)
-  buyWorkerDrone: PropTypes.func.isRequired, // hire a worker who will make widgets
-  workerDronePrice: PropTypes.instanceOf(bigInt).isRequired, // cost of hiring a worker drone
-  buySalesDrone: PropTypes.func.isRequired, // hire a worker who will sell widgets
-  salesDronePrice: PropTypes.instanceOf(bigInt).isRequired // cost of hiring a sales drone
-};
 
 export default ProductionButtons;
