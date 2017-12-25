@@ -1,7 +1,9 @@
 // @flow
 
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer-types";
+type BigInteger = typeof bigInt;
+
+let a: BigInteger = bigInt.lcm(12, 13);
 
 export class Log {
   isFinished: () => boolean;

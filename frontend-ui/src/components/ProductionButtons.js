@@ -3,7 +3,7 @@
 import React from "react";
 
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer-types";
+type BigInteger = typeof bigInt.BigInteger;
 
 type ProductionButtonsProps = {
   buyMaterials: BigInteger => void,

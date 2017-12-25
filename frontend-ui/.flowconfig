@@ -3,8 +3,7 @@
 [include]
 
 [libs]
-flow-typed
-custom-definitions
+src/flow-typed
 
 [lints]
 

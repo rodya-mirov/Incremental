@@ -2,7 +2,7 @@
 
 import React from "react";
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer-types";
+type BigInteger = bigInt.BigInteger;
 
 type Props = {
   money: BigInteger,
