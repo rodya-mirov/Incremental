@@ -1,7 +1,7 @@
 // @flow
 
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer-types";
+import type { BigInteger } from "big-integer";
 
 import { initialState } from "../state";
 import type { State } from "../state";
