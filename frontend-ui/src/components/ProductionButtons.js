@@ -41,11 +41,13 @@ const ProductionButtons = (props: ProductionButtonsProps) => (
         />
         <ButtonComponent
           onClick={() => props.makeWidget(bigInt(1))}
-          text={"Make Widget (for M" + props.materialsPrice.toString() + ")"}
+          text={
+            "Make Widget (for M" + props.materialsPerWidget.toString() + ")"
+          }
         />
         <ButtonComponent
           onClick={() => props.sellWidget(bigInt(1))}
-          text={"Sell Widget (for $" + props.materialsPrice.toString() + ")"}
+          text={"Sell Widget (for $" + props.widgetPrice.toString() + ")"}
         />
       </tr>
       <tr>
