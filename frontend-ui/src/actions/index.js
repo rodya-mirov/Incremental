@@ -1,7 +1,6 @@
 // @flow
 
-import bigInt from "big-integer";
-import type { BigInteger } from "big-integer";
+import { BigInteger } from "../libs/big-int-wrapper";
 
 export type UpdateAction = {
   type: "UPDATE",
@@ -61,7 +60,7 @@ export type Action =
   | ExpiringLogAction;
 
 export function buyMaterialsAction(
-  numMaterials: BigInteger = bigInt(1)
+  numMaterials: BigInteger = new BigInteger(1)
 ): BuyMaterialsAction {
   return {
     type: "BUY_MATERIALS",
@@ -70,7 +69,7 @@ export function buyMaterialsAction(
 }
 
 export function makeWidgetsAction(
-  numWidgets: BigInteger = bigInt(1)
+  numWidgets: BigInteger = new BigInteger(1)
 ): MakeWidgetsAction {
   return {
     type: "MAKE_WIDGETS",
@@ -79,7 +78,7 @@ export function makeWidgetsAction(
 }
 
 export function sellWidgetsAction(
-  numWidgets: BigInteger = bigInt(1)
+  numWidgets: BigInteger = new BigInteger(1)
 ): SellWidgetsAction {
   return {
     type: "SELL_WIDGETS",
@@ -88,7 +87,7 @@ export function sellWidgetsAction(
 }
 
 export function hireBuyerDronesAction(
-  numBuyerDrones: BigInteger = bigInt(1)
+  numBuyerDrones: BigInteger = new BigInteger(1)
 ): HireBuyerDronesAction {
   return {
     type: "HIRE_BUYER_DRONES",
@@ -97,7 +96,7 @@ export function hireBuyerDronesAction(
 }
 
 export function hireWorkerDronesAction(
-  numWorkerDrones: BigInteger = bigInt(1)
+  numWorkerDrones: BigInteger = new BigInteger(1)
 ): HireWorkerDronesAction {
   return {
     type: "HIRE_WORKER_DRONES",
@@ -106,7 +105,7 @@ export function hireWorkerDronesAction(
 }
 
 export function hireSalesDronesAction(
-  numSalesDrones: BigInteger = bigInt(1)
+  numSalesDrones: BigInteger = new BigInteger(1)
 ): HireSalesDronesAction {
   return {
     type: "HIRE_SALES_DRONES",
@@ -132,6 +131,8 @@ export function eternalLogAction(message: string): EternalLogAction {
   };
 }
 
-export function updateAction(numTicks: BigInteger = bigInt(1)): UpdateAction {
+export function updateAction(
+  numTicks: BigInteger = new BigInteger(1)
+): UpdateAction {
   return { type: "UPDATE", numTicks: numTicks };
 }

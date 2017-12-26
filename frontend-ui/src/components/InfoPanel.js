@@ -1,7 +1,7 @@
 // @flow
 
 import React from "react";
-import type { BigInteger } from "big-integer";
+import { BigInteger } from "../libs/big-int-wrapper";
 
 type Props = {
   money: BigInteger,

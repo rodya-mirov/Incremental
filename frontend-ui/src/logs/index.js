@@ -1,7 +1,6 @@
 // @flow
 
-import bigInt from "big-integer";
-import type { BigInteger } from "big-integer";
+import { BigInteger } from "../libs/big-int-wrapper";
 
 export class Log {
   isFinished: () => boolean;
@@ -37,7 +36,9 @@ export class ExpiringLog extends Log {
       () => ticker.value,
       () => {
         ticker.value =
-          ticker.value.compare(0) <= 0 ? bigInt(0) : ticker.value.minus(1);
+          ticker.value.compare(0) <= 0
+            ? new BigInteger(0)
+            : ticker.value.minus(1);
       },
       () => new ExpiringLog(message, ticker.value)
     );
@@ -49,7 +50,7 @@ export class EternalLog extends Log {
     super(
       () => false,
       () => message,
-      () => bigInt(0),
+      () => new BigInteger(0),
       () => undefined,
       () => new EternalLog(message)
     );

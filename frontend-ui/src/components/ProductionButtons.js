@@ -2,8 +2,7 @@
 
 import React from "react";
 
-import bigInt from "big-integer";
-import type { BigInteger } from "big-integer";
+import { BigInteger } from "../libs/big-int-wrapper";
 
 type ProductionButtonsProps = {
   buyMaterials: BigInteger => void,
@@ -36,35 +35,35 @@ const ProductionButtons = (props: ProductionButtonsProps) => (
     <table>
       <tr>
         <ButtonComponent
-          onClick={() => props.buyMaterials(bigInt(1))}
+          onClick={() => props.buyMaterials(new BigInteger(1))}
           text={"Buy Materials (for $" + props.materialsPrice.toString() + ")"}
         />
         <ButtonComponent
-          onClick={() => props.makeWidget(bigInt(1))}
+          onClick={() => props.makeWidget(new BigInteger(1))}
           text={
             "Make Widget (for M" + props.materialsPerWidget.toString() + ")"
           }
         />
         <ButtonComponent
-          onClick={() => props.sellWidget(bigInt(1))}
+          onClick={() => props.sellWidget(new BigInteger(1))}
           text={"Sell Widget (for $" + props.widgetPrice.toString() + ")"}
         />
       </tr>
       <tr>
         <ButtonComponent
-          onClick={() => props.buyBuyerDrone(bigInt(1))}
+          onClick={() => props.buyBuyerDrone(new BigInteger(1))}
           text={
             "Hire Buyer Drone (for $" + props.buyerDronePrice.toString() + ")"
           }
         />
         <ButtonComponent
-          onClick={() => props.buyWorkerDrone(bigInt(1))}
+          onClick={() => props.buyWorkerDrone(new BigInteger(1))}
           text={
             "Hire Worker Drone (for $" + props.workerDronePrice.toString() + ")"
           }
         />
         <ButtonComponent
-          onClick={() => props.buySalesDrone(bigInt(1))}
+          onClick={() => props.buySalesDrone(new BigInteger(1))}
           text={
             "Hire Sales Drone (for $" + props.salesDronePrice.toString() + ")"
           }
