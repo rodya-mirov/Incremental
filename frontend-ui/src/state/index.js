@@ -1,8 +1,20 @@
 // @flow
 
-import bigInt from "big-integer";
-import type { BigInteger } from "big-integer";
+import { BigInteger } from "../libs/big-int-wrapper";
 import { Log } from "../logs";
+
+export type UpkeepState = {
+  ticksUntilPayday: BigInteger,
+
+  numBuyerDrones: BigInteger,
+  buyerDroneUpkeep: BigInteger,
+
+  numWorkerDrones: BigInteger,
+  workerDroneUpkeep: BigInteger,
+
+  numSalesDrones: BigInteger,
+  salesDroneUpkeep: BigInteger
+};
 
 export type State = {
   amtMoney: BigInteger,
@@ -17,50 +29,62 @@ export type State = {
   buyerDronePrice: BigInteger,
   buyerDroneUpkeep: BigInteger,
   buyerDroneProduction: BigInteger,
+  buyProgress: BigInteger,
 
   numWorkerDrones: BigInteger,
   workerDronePrice: BigInteger,
   workerDroneUpkeep: BigInteger,
   workerDroneProduction: BigInteger,
+  makeProgress: BigInteger,
 
   numSalesDrones: BigInteger,
   salesDronePrice: BigInteger,
   salesDroneUpkeep: BigInteger,
   salesDroneProduction: BigInteger,
+  sellProgress: BigInteger,
 
-  logs: Array<Log>
+  logs: Array<Log>,
+  upkeepState: UpkeepState
 };
 
-export function copyState(state: State): State {
-  return {
-    ...state,
-    logs: state.logs.map(log => log.copy())
-  };
-}
-
 export const initialState: State = {
-  amtMoney: bigInt(0),
-  numWidgets: bigInt(0),
-  numMaterials: bigInt(10),
+  amtMoney: new BigInteger(0),
+  numWidgets: new BigInteger(0),
+  numMaterials: new BigInteger(10),
 
-  materialBuyPrice: bigInt(3),
-  materialsPerWidget: bigInt(1),
-  widgetSellPrice: bigInt(10),
+  materialBuyPrice: new BigInteger(3),
+  materialsPerWidget: new BigInteger(1),
+  widgetSellPrice: new BigInteger(10),
 
-  numBuyerDrones: bigInt(0),
-  buyerDronePrice: bigInt(15),
-  buyerDroneUpkeep: bigInt(1),
-  buyerDroneProduction: bigInt(1),
+  numBuyerDrones: new BigInteger(0),
+  buyerDronePrice: new BigInteger(15),
+  buyerDroneUpkeep: new BigInteger(15),
+  buyerDroneProduction: new BigInteger(1),
+  buyProgress: new BigInteger(0),
 
-  numWorkerDrones: bigInt(0),
-  workerDronePrice: bigInt(10),
-  workerDroneUpkeep: bigInt(1),
-  workerDroneProduction: bigInt(1),
+  numWorkerDrones: new BigInteger(0),
+  workerDronePrice: new BigInteger(10),
+  workerDroneUpkeep: new BigInteger(10),
+  workerDroneProduction: new BigInteger(1),
+  makeProgress: new BigInteger(0),
 
-  numSalesDrones: bigInt(0),
-  salesDronePrice: bigInt(25),
-  salesDroneUpkeep: bigInt(2),
-  salesDroneProduction: bigInt(1),
+  numSalesDrones: new BigInteger(0),
+  salesDronePrice: new BigInteger(25),
+  salesDroneUpkeep: new BigInteger(25),
+  salesDroneProduction: new BigInteger(1),
+  sellProgress: new BigInteger(0),
 
-  logs: []
+  logs: [],
+  upkeepState: {
+    ticksUntilPayday: new BigInteger(50),
+
+    numBuyerDrones: new BigInteger(0),
+    buyerDroneUpkeep: new BigInteger(0),
+
+    numWorkerDrones: new BigInteger(0),
+    workerDroneUpkeep: new BigInteger(0),
+
+    numSalesDrones: new BigInteger(0),
+    salesDroneUpkeep: new BigInteger(0)
+  }
 };

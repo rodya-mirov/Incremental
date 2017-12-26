@@ -12,6 +12,8 @@ import reducer from "./reducers";
 import { initialState } from "./state";
 import { updateAction } from "./actions/index";
 
+import { MS_PER_TICK } from "./constants";
+
 import "./index.css";
 
 let root = document.getElementById("root");
@@ -26,7 +28,7 @@ if (root != null) {
     root
   );
 
-  setInterval(() => store.dispatch(updateAction()), 100);
+  setInterval(() => store.dispatch(updateAction()), MS_PER_TICK);
 
   // Boilerplate from the generator; I forgot what it does (efficiency???)
   registerServiceWorker();
