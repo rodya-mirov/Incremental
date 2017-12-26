@@ -1,7 +1,7 @@
 // @flow
 
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer-types";
+import type { BigInteger } from "big-integer";
 
 export class Log {
   isFinished: () => boolean;

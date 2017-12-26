@@ -3,7 +3,7 @@
 import React from "react";
 
 import bigInt from "big-integer";
-import { BigInteger } from "big-integer-types";
+import type { BigInteger } from "big-integer";
 
 type ProductionButtonsProps = {
   buyMaterials: BigInteger => void,
@@ -41,11 +41,13 @@ const ProductionButtons = (props: ProductionButtonsProps) => (
         />
         <ButtonComponent
           onClick={() => props.makeWidget(bigInt(1))}
-          text={"Make Widget (for M" + props.materialsPrice.toString() + ")"}
+          text={
+            "Make Widget (for M" + props.materialsPerWidget.toString() + ")"
+          }
         />
         <ButtonComponent
           onClick={() => props.sellWidget(bigInt(1))}
-          text={"Sell Widget (for $" + props.materialsPrice.toString() + ")"}
+          text={"Sell Widget (for $" + props.widgetPrice.toString() + ")"}
         />
       </tr>
       <tr>
