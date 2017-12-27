@@ -1,93 +1,105 @@
 //@flow
 import { BigInteger } from "../libs/big-int-wrapper";
 
+import type { Log } from "../logs";
 import type { UpdateAction } from "../actions";
-import type { State, UpkeepState } from "../state";
+import type { State, UpkeepState, UpkeepCategoryState } from "../state";
 import { ExpiringLog } from "../logs";
 
-import {
-  TICKS_PER_SECOND,
-  TICKS_PER_UPKEEP,
-  UNITS_PER_BUY
-} from "../constants";
+import { TICKS_PER_SECOND, TICKS_PER_UPKEEP } from "../constants";
 
 import * as reducers from "./general";
 
-function payBuyerDroneUpkeep(prevState: State): State {
+function payUpkeepHelper(
+  currentUpkeep: UpkeepCategoryState,
+  currentMoney: BigInteger,
+  droneNamePlural: string
+): { newMoney: BigInteger, lostDrones: BigInteger, newLogs: Array<Log> } {
   let result = reducers.transactionHelper(
-    prevState.numBuyerDrones,
-    prevState.amtMoney,
-    prevState.buyerDroneUpkeep,
+    currentUpkeep.numDrones,
+    currentMoney,
+    currentUpkeep.upkeepPerDrone,
     0
   );
 
+  const newLogs = [];
   if (result.failures.compare(0) > 0) {
-    let message =
+    const message =
       "Lost " +
       result.failures.toString() +
-      " buyer drones because their salary could not be paid!";
-    prevState = reducers.addLog(
-      prevState,
-      new ExpiringLog(message, new BigInteger(100))
-    );
+      " " +
+      droneNamePlural +
+      " because their salary could not be paid!";
+    newLogs.push(new ExpiringLog(message, new BigInteger(100)));
+  }
+
+  return {
+    newMoney: currentMoney.minus(result.inputConsumed),
+    lostDrones: result.failures,
+    newLogs: newLogs
+  };
+}
+
+function payBuyerDroneUpkeep(prevState: State): State {
+  let result = payUpkeepHelper(
+    prevState.upkeepState.buyerState,
+    prevState.amtMoney,
+    "buyer drones"
+  );
+
+  for (let log: Log of result.newLogs) {
+    prevState = reducers.addLog(prevState, log);
   }
 
   return {
     ...prevState,
-    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
-    numBuyerDrones: result.successes
+    amtMoney: result.newMoney,
+    buyerDronesData: {
+      ...prevState.buyerDronesData,
+      numDrones: prevState.buyerDronesData.numDrones.minus(result.lostDrones)
+    }
   };
 }
 
 function payWorkerDroneUpkeep(prevState: State): State {
-  let result = reducers.transactionHelper(
-    prevState.numWorkerDrones,
+  let result = payUpkeepHelper(
+    prevState.upkeepState.workerState,
     prevState.amtMoney,
-    prevState.workerDroneUpkeep,
-    0
+    "buyer drones"
   );
 
-  if (result.failures.compare(0) > 0) {
-    let message =
-      "Lost " +
-      result.failures.toString() +
-      " worker drones because their salary could not be paid!";
-    prevState = reducers.addLog(
-      prevState,
-      new ExpiringLog(message, new BigInteger(100))
-    );
+  for (let log: Log of result.newLogs) {
+    prevState = reducers.addLog(prevState, log);
   }
 
   return {
     ...prevState,
-    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
-    numWorkerDrones: result.successes
+    amtMoney: result.newMoney,
+    workerDronesData: {
+      ...prevState.workerDronesData,
+      numDrones: prevState.workerDronesData.numDrones.minus(result.lostDrones)
+    }
   };
 }
 
 function paySalesDroneUpkeep(prevState: State): State {
-  let result = reducers.transactionHelper(
-    prevState.numSalesDrones,
+  let result = payUpkeepHelper(
+    prevState.upkeepState.salesState,
     prevState.amtMoney,
-    prevState.salesDroneUpkeep,
-    0
+    "buyer drones"
   );
 
-  if (result.failures.compare(0) > 0) {
-    let message =
-      "Lost " +
-      result.failures.toString() +
-      " sales drones because their salary could not be paid!";
-    prevState = reducers.addLog(
-      prevState,
-      new ExpiringLog(message, new BigInteger(100))
-    );
+  for (let log: Log of result.newLogs) {
+    prevState = reducers.addLog(prevState, log);
   }
 
   return {
     ...prevState,
-    amtMoney: prevState.amtMoney.minus(result.inputConsumed),
-    numSalesDrones: result.successes
+    amtMoney: result.newMoney,
+    salesDronesData: {
+      ...prevState.salesDronesData,
+      numDrones: prevState.salesDronesData.numDrones.minus(result.lostDrones)
+    }
   };
 }
 
@@ -106,10 +118,10 @@ function tickUpkeepState(prevState: State): State {
 }
 
 function computeUpkeepDue(upkeepState: UpkeepState): BigInteger {
-  return upkeepState.numBuyerDrones
-    .times(upkeepState.buyerDroneUpkeep)
-    .plus(upkeepState.numWorkerDrones.times(upkeepState.workerDroneUpkeep))
-    .plus(upkeepState.numSalesDrones.times(upkeepState.salesDroneUpkeep));
+  let perCategory = cat => cat.numDrones.times(cat.upkeepPerDrone);
+  return perCategory(upkeepState.buyerState)
+    .plus(perCategory(upkeepState.workerState))
+    .plus(perCategory(upkeepState.salesState));
 }
 
 function addUpkeepWarning(prevState: State): State {
@@ -129,42 +141,53 @@ function addUpkeepWarning(prevState: State): State {
 }
 
 function resetUpkeepState(prevState: State): State {
+  let makeUpkeepState = dronesData => {
+    return {
+      numDrones: dronesData.numDrones,
+      upkeepPerDrone: dronesData.upkeepPrice
+    };
+  };
+
   let newUpkeepState: UpkeepState = {
     ticksUntilPayday: new BigInteger(TICKS_PER_UPKEEP),
 
-    numBuyerDrones: prevState.numBuyerDrones,
-    buyerDroneUpkeep: prevState.buyerDroneUpkeep,
-
-    numWorkerDrones: prevState.numWorkerDrones,
-    workerDroneUpkeep: prevState.workerDroneUpkeep,
-
-    numSalesDrones: prevState.numSalesDrones,
-    salesDroneUpkeep: prevState.salesDroneUpkeep
+    buyerState: makeUpkeepState(prevState.buyerDronesData),
+    workerState: makeUpkeepState(prevState.workerDronesData),
+    salesState: makeUpkeepState(prevState.salesDronesData)
   };
 
   return { ...prevState, upkeepState: newUpkeepState };
 }
 
 function doAllProgress(prevState: State): State {
-  let buyProgressResult = prevState.buyProgress
-    .plus(prevState.buyerDroneProduction.times(prevState.numBuyerDrones))
-    .divmod(UNITS_PER_BUY);
-  let makeProgressResult = prevState.makeProgress
-    .plus(prevState.workerDroneProduction.times(prevState.numWorkerDrones))
-    .divmod(UNITS_PER_BUY);
-  let sellProgressResult = prevState.sellProgress
-    .plus(prevState.salesDroneProduction.times(prevState.numSalesDrones))
-    .divmod(UNITS_PER_BUY);
+  let doProgress = dronesData =>
+    dronesData.workProgress
+      .plus(dronesData.production.times(dronesData.numDrones))
+      .divmod(dronesData.progressPerUnit);
 
+  let buyProgressResult = doProgress(prevState.buyerDronesData);
   prevState = reducers.buyMaterials(prevState, buyProgressResult.quotient);
+
+  let makeProgressResult = doProgress(prevState.workerDronesData);
   prevState = reducers.makeWidgets(prevState, makeProgressResult.quotient);
+
+  let sellProgressResult = doProgress(prevState.salesDronesData);
   prevState = reducers.sellWidgets(prevState, sellProgressResult.quotient);
 
   return {
     ...prevState,
-    buyProgress: buyProgressResult.remainder,
-    makeProgress: makeProgressResult.remainder,
-    sellProgress: sellProgressResult.remainder
+    buyerDronesData: {
+      ...prevState.buyerDronesData,
+      workProgress: buyProgressResult.remainder
+    },
+    workerDronesData: {
+      ...prevState.workerDronesData,
+      workProgress: makeProgressResult.remainder
+    },
+    salesDronesData: {
+      ...prevState.salesDronesData,
+      workProgress: sellProgressResult.remainder
+    }
   };
 }
 

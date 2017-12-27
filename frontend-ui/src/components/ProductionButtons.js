@@ -4,7 +4,7 @@ import React from "react";
 
 import { BigInteger } from "../libs/big-int-wrapper";
 
-type ProductionButtonsProps = {
+export type ProductionButtonsProps = {
   buyMaterials: BigInteger => void,
   materialsPrice: BigInteger,
   makeWidget: BigInteger => void,

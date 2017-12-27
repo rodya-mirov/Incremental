@@ -19,9 +19,9 @@ const mapStateToProps = (state: State) => {
     materialsPerWidget: state.materialsPerWidget,
     widgetPrice: state.widgetSellPrice,
 
-    buyerDronePrice: state.buyerDronePrice,
-    workerDronePrice: state.workerDronePrice,
-    salesDronePrice: state.salesDronePrice
+    buyerDronePrice: state.buyerDronesData.hirePrice,
+    workerDronePrice: state.workerDronesData.hirePrice,
+    salesDronePrice: state.salesDronesData.hirePrice
   };
 };
 

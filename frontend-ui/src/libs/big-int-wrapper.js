@@ -13,12 +13,8 @@ function getValue(x: any): any {
 export class BigInteger {
   value: any; // because 'big-integer' isn't flow typed
 
-  constructor(input: string | number | BigInteger) {
-    if (input && input instanceof BigInteger) {
-      this.value = input.value;
-    } else {
-      this.value = bigInt(input);
-    }
+  constructor(input: number) {
+    this.value = bigInt(input);
   }
 
   plus(other: string | number | BigInteger): BigInteger {

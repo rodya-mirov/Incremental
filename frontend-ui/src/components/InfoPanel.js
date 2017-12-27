@@ -3,7 +3,7 @@
 import React from "react";
 import { BigInteger } from "../libs/big-int-wrapper";
 
-type Props = {
+export type Props = {
   money: BigInteger,
   materials: BigInteger,
   widgets: BigInteger,

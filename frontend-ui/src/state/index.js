@@ -3,17 +3,26 @@
 import { BigInteger } from "../libs/big-int-wrapper";
 import { Log } from "../logs";
 
+export type UpkeepCategoryState = {
+  numDrones: BigInteger,
+  upkeepPerDrone: BigInteger
+};
+
 export type UpkeepState = {
   ticksUntilPayday: BigInteger,
 
-  numBuyerDrones: BigInteger,
-  buyerDroneUpkeep: BigInteger,
+  buyerState: UpkeepCategoryState,
+  workerState: UpkeepCategoryState,
+  salesState: UpkeepCategoryState
+};
 
-  numWorkerDrones: BigInteger,
-  workerDroneUpkeep: BigInteger,
-
-  numSalesDrones: BigInteger,
-  salesDroneUpkeep: BigInteger
+export type DronesData = {
+  numDrones: BigInteger,
+  hirePrice: BigInteger,
+  upkeepPrice: BigInteger,
+  production: BigInteger,
+  workProgress: BigInteger,
+  progressPerUnit: BigInteger
 };
 
 export type State = {
@@ -25,23 +34,9 @@ export type State = {
   materialsPerWidget: BigInteger, // number of materials required to produce a widget
   widgetSellPrice: BigInteger,
 
-  numBuyerDrones: BigInteger,
-  buyerDronePrice: BigInteger,
-  buyerDroneUpkeep: BigInteger,
-  buyerDroneProduction: BigInteger,
-  buyProgress: BigInteger,
-
-  numWorkerDrones: BigInteger,
-  workerDronePrice: BigInteger,
-  workerDroneUpkeep: BigInteger,
-  workerDroneProduction: BigInteger,
-  makeProgress: BigInteger,
-
-  numSalesDrones: BigInteger,
-  salesDronePrice: BigInteger,
-  salesDroneUpkeep: BigInteger,
-  salesDroneProduction: BigInteger,
-  sellProgress: BigInteger,
+  buyerDronesData: DronesData,
+  workerDronesData: DronesData,
+  salesDronesData: DronesData,
 
   logs: Array<Log>,
   upkeepState: UpkeepState
@@ -56,35 +51,50 @@ export const initialState: State = {
   materialsPerWidget: new BigInteger(1),
   widgetSellPrice: new BigInteger(10),
 
-  numBuyerDrones: new BigInteger(0),
-  buyerDronePrice: new BigInteger(15),
-  buyerDroneUpkeep: new BigInteger(15),
-  buyerDroneProduction: new BigInteger(1),
-  buyProgress: new BigInteger(0),
+  buyerDronesData: {
+    numDrones: new BigInteger(0),
+    hirePrice: new BigInteger(15),
+    upkeepPrice: new BigInteger(15),
+    production: new BigInteger(1),
+    workProgress: new BigInteger(0),
+    progressPerUnit: new BigInteger(10)
+  },
 
-  numWorkerDrones: new BigInteger(0),
-  workerDronePrice: new BigInteger(10),
-  workerDroneUpkeep: new BigInteger(10),
-  workerDroneProduction: new BigInteger(1),
-  makeProgress: new BigInteger(0),
+  workerDronesData: {
+    numDrones: new BigInteger(0),
+    hirePrice: new BigInteger(10),
+    upkeepPrice: new BigInteger(10),
+    production: new BigInteger(1),
+    workProgress: new BigInteger(0),
+    progressPerUnit: new BigInteger(10)
+  },
 
-  numSalesDrones: new BigInteger(0),
-  salesDronePrice: new BigInteger(25),
-  salesDroneUpkeep: new BigInteger(25),
-  salesDroneProduction: new BigInteger(1),
-  sellProgress: new BigInteger(0),
+  salesDronesData: {
+    numDrones: new BigInteger(0),
+    hirePrice: new BigInteger(25),
+    upkeepPrice: new BigInteger(25),
+    production: new BigInteger(1),
+    workProgress: new BigInteger(0),
+    progressPerUnit: new BigInteger(10)
+  },
 
   logs: [],
   upkeepState: {
     ticksUntilPayday: new BigInteger(50),
 
-    numBuyerDrones: new BigInteger(0),
-    buyerDroneUpkeep: new BigInteger(0),
+    buyerState: {
+      numDrones: new BigInteger(0),
+      upkeepPerDrone: new BigInteger(15)
+    },
 
-    numWorkerDrones: new BigInteger(0),
-    workerDroneUpkeep: new BigInteger(0),
+    workerState: {
+      numDrones: new BigInteger(0),
+      upkeepPerDrone: new BigInteger(10)
+    },
 
-    numSalesDrones: new BigInteger(0),
-    salesDroneUpkeep: new BigInteger(0)
+    salesState: {
+      numDrones: new BigInteger(0),
+      upkeepPerDrone: new BigInteger(25)
+    }
   }
 };
