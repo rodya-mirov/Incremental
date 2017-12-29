@@ -160,3 +160,16 @@ export function addLog(prevState: State, log: Log): State {
 
   return { ...prevState, logs: newLogs };
 }
+
+export function addLogs(prevState: State, logs: Array<Log>): State {
+  if (logs.length === 0) {
+    return prevState;
+  }
+
+  const newLogs = prevState.logs.map(x => x);
+  for (const log of logs) {
+    newLogs.push(log);
+  }
+
+  return { ...prevState, logs: newLogs };
+}

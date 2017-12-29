@@ -89,9 +89,7 @@ function paySalesDroneUpkeep(prevState: State): State {
     "buyer drones"
   );
 
-  for (let log: Log of result.newLogs) {
-    prevState = reducers.addLog(prevState, log);
-  }
+  prevState = reducers.addLogs(prevState, result.newLogs);
 
   return {
     ...prevState,

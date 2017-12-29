@@ -57,6 +57,8 @@ function handleEternalLogAction(prevState, action: EternalLogAction) {
 }
 
 function mainReducer(prevState: State = initialState, action: Action): State {
+  console.log("Action:", action);
+
   switch (action.type) {
     case "UPDATE":
       return handleUpdateAction(prevState, action);
